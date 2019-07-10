@@ -2,7 +2,7 @@ db = db.getSiblingDB("dashboarddb");
 
 db.createUser({
   user: "dashboarduser",
-  pwd: "dbpassword",
+  pwd: "dashboardpass",
   "roles": [
     {
       "role": "readWrite",

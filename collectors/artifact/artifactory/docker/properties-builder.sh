@@ -21,7 +21,7 @@ echo "MONGODB_PORT: $MONGODB_PORT"
 
 cat > $PROP_FILE <<EOF
 #Database Name
-dbname=${HYGIEIA_API_ENV_SPRING_DATA_MONGODB_DATABASE:-dashboard}
+dbname=${SPRING_DATA_MONGODB_DATABASE:-dashboarddb}
 
 #Database HostName - default is localhost
 dbhost=${MONGODB_HOST:-10.0.1.1}
@@ -30,25 +30,13 @@ dbhost=${MONGODB_HOST:-10.0.1.1}
 dbport=${MONGODB_PORT:-27017}
 
 #Database Username - default is blank
-dbusername=${HYGIEIA_API_ENV_SPRING_DATA_MONGODB_USERNAME:-dashboarduser}
+dbusername=${SPRING_DATA_MONGODB_USERNAME:-dashboarduser}
 
 #Database Password - default is blank
-dbpassword=${HYGIEIA_API_ENV_SPRING_DATA_MONGODB_PASSWORD:-dbpassword}
+dbpassword=${SPRING_DATA_MONGODB_PASSWORD:-dbpassword}
 
 #Collector schedule (required)
 artifactory.cron=${ARTIFACTORY_CRON:-0 0/5 * * * *}
-
-#Artifactory server (required) - Can provide multiple
-#artifactory.servers[0]=https://www.jfrog.com/
-
-#Artifactory user name (required)
-#artifactory.usernames[0]=bobama
-
-#Artifactory api key (required)
-#artifactory.apiKeys[0]=-s3cr3t
-
-#The repos to collect artifacts from (required) - Can provide multiple (comma separated for each server)
-#artifactory.repos[0]=prerelease,release
 
 # Artifact Regex Patterns
 # Each artifact found is matched against the following patterns in order (first one wins)
@@ -88,20 +76,22 @@ do
         username="ARTIFACTORY_USERNAME"
         apiKey="ARTIFACTORY_API_KEY"
         repos="ARTIFACTORY_REPO"
+        patterns="ARTIFACTORY_PATTERN"
     else
         server="ARTIFACTORY_URL$i"
         username="ARTIFACTORY_USERNAME$i"
         apiKey="ARTIFACTORY_API_KEY$i"
         repos="ARTIFACTORY_REPO$i"
+        patterns="ARTIFACTORY_PATTERN$i"
     fi
     
     
 cat >> $PROP_FILE <<EOF
-artifactory.servers[${i}]=${!server}
-artifactory.usernames[${i}]=${!username}
-artifactory.apiKeys[${i}]=${!apiKey}
-artifactory.repos[${i}]=${!repos}
-
+artifactory.servers[${i}].url=${!server}
+artifactory.servers[${i}].username=${!username}
+artifactory.servers[${i}].apiKey=${!apiKey}
+artifactory.servers[${i}].repoAndPatterns[0].repo=${!repos}
+artifactory.servers[${i}].repoAndPatterns[0].patterns[0]=${!patterns}
 EOF
     
     i=$(($i+1))
@@ -111,6 +101,8 @@ cat >> $PROP_FILE <<EOF
 
 # Artifactory REST endpoint
 artifactory.endpoint=${ARTIFACTORY_ENDPOINT:-artifactory/}
+artifactory.mode=${ARTIFACTORY_MODE:-ARTIFACT_BASED}
+artifactory.offSet=${ARTIFACTORY_OFFSET:-3600000}
 EOF
 
 echo "
